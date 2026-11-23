@@ -360,4 +360,9 @@ $("backup-file").addEventListener("change", async (e) => {
   save();
 });
 
-useState(loadSaved() ?? structuredClone(SEED_STATE));
+const EMPTY_STATE = {
+  perDay: 6,
+  nurses: Array.from({ length: 22 }, (_, i) => ({ id: `n${i + 1}`, name: `Hemşire ${i + 1}` })),
+  leaves: [],
+};
+useState(loadSaved() ?? EMPTY_STATE);
