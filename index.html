@@ -12,9 +12,14 @@
     h2 { font-size: 15px; margin: 0 0 10px; }
     select, button, input { font: inherit; padding: 5px 8px; }
     button.has-errors { background: var(--bad); color: #fff; border: 1px solid var(--bad); border-radius: 4px; }
-    .legend, .hint, #status { color: var(--muted); font-size: 13px; }
+    .legend, #status { color: var(--muted); font-size: 13px; }
     .legend b { display: inline-block; width: 18px; text-align: center; border-radius: 3px; color: #fff; }
-    .hint { margin: 0 0 10px; }
+    .info { max-width: 900px; margin: 0 0 12px; padding: 10px 14px; border: 1px solid #bfdbfe; border-radius: 8px; background: #eff6ff; font-size: 13px; }
+    .info summary { cursor: pointer; font-weight: 600; }
+    .info ol { margin: 8px 0; padding-left: 20px; }
+    .info dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; margin: 8px 0 0; }
+    .info dt { font-weight: 600; }
+    .info dd { margin: 0; }
     .wrap { overflow-x: auto; }
     table { border-collapse: collapse; font-size: 13px; }
     th, td { border: 1px solid var(--line); padding: 4px; text-align: center; min-width: 22px; user-select: none; }
@@ -76,7 +81,7 @@
     dialog { border: 1px solid var(--line); border-radius: 8px; max-width: 520px; width: 90vw; }
     dialog ul { max-height: 50vh; overflow-y: auto; padding-left: 20px; }
     dialog li { margin-bottom: 4px; }
-    @media print { header button, .hint, .modes, .leave-panel, td.name button, tr.add-row { display: none; } td.name input { border: none; } body { margin: 8px; } }
+    @media print { header button, .info, .modes, .leave-panel, td.name button, tr.add-row { display: none; } td.name input { border: none; } body { margin: 8px; } }
   </style>
 </head>
 <body>
@@ -109,13 +114,26 @@
     <b class="off-mark">×</b> çalışmak istemiyor &nbsp;
     <b style="background:var(--weekend)">&nbsp;</b> hafta sonu
   </p>
-  <p class="hint">
-    Sıra: önce N sütununda önceki ayın son günü nöbet tutanları, sonra "Tıklayınca" seçeneğiyle çalışmak istediği ve istemediği günleri işaretle, en son "Otomatik doldur"a bas.
-    "Temizle" bu ayın nöbetlerini siler; izinler, işaretler ve tercihler kalır. Sonrasında çizelgeyi sadece sen değiştirirsin.
-    Nöbeti sürükleyip boş hücreye bırakınca taşınır, başka bir nöbetin üstüne bırakınca ikisi yer değiştirir.
-    Boş hücreye tıklamak nöbet ekler, nöbete tıklamak kaldırır. İsimlerin üstüne tıklayıp düzenleyebilir, × ile silebilir, en alttaki satırdan yeni kişi ekleyebilirsin.
-  </p>
-  <div class="wrap"><table id="grid"></table></div>
+  <details class="info" open>
+    <summary>Nasıl kullanılır</summary>
+    <ol>
+      <li>Tablonun en altındaki "+ Hemşire ekle" satırına isim yazıp Enter'a bas. İsme tıklayıp düzenleyebilir, × ile silebilirsin.</li>
+      <li>Yıllık izinleri sayfanın altındaki "Yıllık izinler" bölümünden ekle. İzin öncesi ve sonrası nöbet, nöbet izni ve yol izni günleri kendiliğinden hesaplanır.</li>
+      <li>N sütununda önceki ayın son günü nöbet tutanları işaretle.</li>
+      <li>"Tıklayınca" seçeneğini değiştirip çalışmak istediği (+) ve istemediği (×) günleri işaretle.</li>
+      <li>"Otomatik doldur"a bas, sonra çizelgeyi istediğin gibi düzelt.</li>
+    </ol>
+    <dl>
+      <dt>Kontrol et</dt><dd>Kural hatalarını listeler. Hata varsa düğme kırmızı olur ve sayıyı gösterir.</dd>
+      <dt>Otomatik doldur</dt><dd>Seçili ayın çizelgesini izin, tercih ve kurallara göre baştan oluşturur.</dd>
+      <dt>Temizle</dt><dd>Seçili ayın nöbetlerini siler. İzinler, N işaretleri ve tercihler kalır.</dd>
+      <dt>Yazdır</dt><dd>Çizelgeyi yazdırır.</dd>
+      <dt>Yedek indir</dt><dd>Tüm veriyi bir dosyaya kaydeder. Veri sadece bu tarayıcıda tutulduğu için arada bir yedek al.</dd>
+      <dt>Yedek yükle</dt><dd>İndirilen yedeği geri yükler. Şu anki verinin yerine geçer.</dd>
+      <dt>Hücreye tıklama</dt><dd>Boş hücre nöbet ekler, nöbete tıklamak kaldırır.</dd>
+      <dt>Sürükle bırak</dt><dd>Nöbeti boş hücreye bırakınca taşınır, başka nöbetin üstüne bırakınca ikisi yer değiştirir.</dd>
+    </dl>
+  </details>  <div class="wrap"><table id="grid"></table></div>
 
   <section class="leave-panel">
     <div class="leave-head">
