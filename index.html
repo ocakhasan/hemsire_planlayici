@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nöbet Çizelgesi</title>
+  <style>
+    :root { --line: #d0d4da; --muted: #6b7280; --shift: #2563eb; --leave: #f59e0b; --weekend: #fde2e2; --weekend-ink: #b91c1c; --bad: #dc2626; }
+    body { font-family: system-ui, sans-serif; margin: 24px; color: #111827; background: #fff; }
+    header { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+    h1 { font-size: 20px; margin: 0 16px 0 0; }
+    h2 { font-size: 15px; margin: 0 0 10px; }
+    select, button, input { font: inherit; padding: 5px 8px; }
+    button.has-errors { background: var(--bad); color: #fff; border: 1px solid var(--bad); border-radius: 4px; }
+    .legend, .hint, #status { color: var(--muted); font-size: 13px; }
+    .legend b { display: inline-block; width: 18px; text-align: center; border-radius: 3px; color: #fff; }
+    .hint { margin: 0 0 10px; }
+    .wrap { overflow-x: auto; }
+    table { border-collapse: collapse; font-size: 13px; }
+    th, td { border: 1px solid var(--line); padding: 4px; text-align: center; min-width: 22px; user-select: none; }
+    th.name, td.name { text-align: left; white-space: nowrap; position: sticky; left: 0; background: #fff; min-width: 140px; z-index: 1; }
+    #grid tbody td:not(.name) { cursor: pointer; }
+    .weekend { background: var(--weekend); }
+    th.weekend { color: var(--weekend-ink); font-weight: 700; }
+    th.weekend .dow { color: var(--weekend-ink); font-weight: 700; }
+    .week-start { border-left: 3px solid #6b7280; }
+    td.shift { background: var(--shift); color: #fff; font-weight: 600; cursor: grab !important; }
+    td.shift.weekend { background: #1e3a8a; }
+    td.leave { background: var(--leave); color: #fff; }
+    td.bad { background: var(--bad); }
+    td.over { outline: 2px dashed #111827; outline-offset: -3px; }
+    tfoot td { font-weight: 600; }
+    tfoot td.bad { background: #fff; color: var(--bad); }
+    .dow { color: var(--muted); font-weight: 400; font-size: 11px; }
+    td.name { padding: 2px; }
+    td.name input { border: 1px solid transparent; background: transparent; width: 150px; padding: 3px 4px; }
+    td.name input:hover, td.name input:focus { border-color: var(--line); background: #fff; }
+    td.name button { border: none; background: none; color: var(--muted); cursor: pointer; padding: 2px 6px; }
+    td.name button:hover { color: var(--bad); }
+    tr.add-row td.name input { border-color: var(--line); }
+    th.prev, td.prev { border-right: 3px solid #6b7280; cursor: pointer; }
+    td.prev.shift { cursor: pointer !important; }
+    td.gap { background: #fecaca; }
+    .modes { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; font-size: 13px; margin-bottom: 10px; }
+    .modes > span { color: var(--muted); }
+    .modes label { display: flex; gap: 5px; align-items: center; cursor: pointer; }
+    header button.primary { background: var(--shift); color: #fff; border: 1px solid var(--shift); border-radius: 4px; }
+    .want-mark { background: #dcfce7 !important; color: #15803d !important; font-weight: 700; }
+    .off-mark { background: #e5e7eb !important; color: #4b5563 !important; font-weight: 700; }
+    td.want { box-shadow: inset 0 0 0 2px #16a34a; }
+    td.want:not(.shift) { background: #dcfce7; color: #15803d; font-weight: 700; }
+    td.off { background: repeating-linear-gradient(45deg, #f3f4f6, #f3f4f6 4px, #e5e7eb 4px, #e5e7eb 8px); color: #4b5563; font-weight: 700; }
+    td.off.shift { box-shadow: inset 0 0 0 2px #4b5563; }
+    td.rest { background: #fef3c7; color: #92400e; font-size: 10px; font-weight: 600; }
+    .leave-panel { margin-top: 28px; max-width: 900px; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+    .leave-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+    .leave-head h2 { margin: 0; }
+    .toggle { font-size: 13px; color: var(--muted); display: flex; gap: 6px; align-items: center; }
+    .leave-form { display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 12px; align-items: end; padding: 16px; background: #f9fafb; border-bottom: 1px solid var(--line); }
+    .leave-form label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); font-weight: 600; }
+    .leave-form select, .leave-form input { border: 1px solid var(--line); border-radius: 6px; background: #fff; color: #111827; padding: 7px 8px; }
+    .leave-form button.primary { background: var(--shift); color: #fff; border: none; border-radius: 6px; padding: 8px 16px; cursor: pointer; font-weight: 600; }
+    .leave-form button.primary:hover { background: #1d4ed8; }
+    .preview { grid-column: 1 / -1; margin: 0; font-size: 13px; color: var(--muted); min-height: 1.2em; }
+    .preview.error { color: var(--bad); }
+    .leave-table { width: 100%; font-size: 14px; }
+    .leave-table th, .leave-table td { border: none; border-bottom: 1px solid #eef0f3; padding: 9px 16px; text-align: left; }
+    .leave-table th { font-size: 12px; color: var(--muted); font-weight: 600; background: #fff; }
+    .leave-table tr:last-child td { border-bottom: none; }
+    .leave-table td.days { font-variant-numeric: tabular-nums; }
+    .leave-table td.prep { color: var(--muted); font-size: 13px; }
+    .leave-table button { border: 1px solid var(--line); background: #fff; border-radius: 6px; padding: 4px 10px; cursor: pointer; color: var(--muted); }
+    .leave-table button:hover { border-color: var(--bad); color: var(--bad); }
+    .leave-table .empty { color: var(--muted); text-align: center; padding: 20px; }
+    @media (max-width: 640px) { .leave-form { grid-template-columns: 1fr 1fr; } .leave-form label:first-child { grid-column: 1 / -1; } }
+    dialog { border: 1px solid var(--line); border-radius: 8px; max-width: 520px; width: 90vw; }
+    dialog ul { max-height: 50vh; overflow-y: auto; padding-left: 20px; }
+    dialog li { margin-bottom: 4px; }
+    @media print { header button, .hint, .modes, .leave-panel, td.name button, tr.add-row { display: none; } td.name input { border: none; } body { margin: 8px; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Hemşire Nöbet Çizelgesi</h1>
+    <select id="month"></select>
+    <input id="year" type="number" min="2020" max="2100" style="width:90px">
+    <button id="check">Kontrol et</button>
+    <button id="autofill" class="primary">Otomatik doldur</button>
+    <button id="clear">Temizle</button>
+    <button onclick="window.print()">Yazdır</button>
+    <button id="backup-download">Yedek indir</button>
+    <button id="backup-upload">Yedek yükle</button>
+    <input id="backup-file" type="file" accept="application/json,.json" hidden>
+    <span id="status"></span>
+  </header>
+  <div class="modes" role="radiogroup" aria-label="Tıklayınca">
+    <span>Tıklayınca:</span>
+    <label><input type="radio" name="mode" value="shift" checked> Nöbet ekle / kaldır</label>
+    <label><input type="radio" name="mode" value="want"> <b class="mark want-mark">+</b> Çalışmak istiyor</label>
+    <label><input type="radio" name="mode" value="off"> <b class="mark off-mark">×</b> Çalışmak istemiyor</label>
+  </div>
+  <p class="legend">
+    <b style="background:var(--shift)">N</b> 24 saat nöbet &nbsp;
+    <b style="background:var(--leave)">İ</b> yıllık izin &nbsp;
+    <b style="background:#fef3c7; color:#92400e; font-size:10px">Nİ</b> izin öncesi nöbet izni &nbsp;
+    <b style="background:var(--bad)">N</b> hatalı nöbet (izin, nöbet izni ya da üst üste) &nbsp;
+    <b style="background:#fecaca">&nbsp;</b> 4 günden uzun boşluk &nbsp;
+    <b class="want-mark">+</b> çalışmak istiyor &nbsp;
+    <b class="off-mark">×</b> çalışmak istemiyor &nbsp;
+    <b style="background:var(--weekend)">&nbsp;</b> hafta sonu
+  </p>
+  <p class="hint">
+    Sıra: önce N sütununda önceki ayın son günü nöbet tutanları, sonra "Tıklayınca" seçeneğiyle çalışmak istediği ve istemediği günleri işaretle, en son "Otomatik doldur"a bas.
+    "Temizle" bu ayın nöbetlerini siler; izinler, işaretler ve tercihler kalır. Sonrasında çizelgeyi sadece sen değiştirirsin.
+    Nöbeti sürükleyip boş hücreye bırakınca taşınır, başka bir nöbetin üstüne bırakınca ikisi yer değiştirir.
+    Boş hücreye tıklamak nöbet ekler, nöbete tıklamak kaldırır. İsimlerin üstüne tıklayıp düzenleyebilir, × ile silebilir, en alttaki satırdan yeni kişi ekleyebilirsin.
+  </p>
+  <div class="wrap"><table id="grid"></table></div>
+
+  <section class="leave-panel">
+    <div class="leave-head">
+      <h2>Yıllık izinler</h2>
+      <label class="toggle"><input type="checkbox" id="leave-all"> Tüm ayları göster</label>
+    </div>
+    <form id="add-leave" class="leave-form">
+      <label>Hemşire<select id="leave-nurse" required></select></label>
+      <label>Başlangıç<input id="leave-start" type="date" required></label>
+      <label>Bitiş<input id="leave-end" type="date" required></label>
+      <button class="primary">İzin ekle</button>
+      <p id="leave-preview" class="preview"></p>
+    </form>
+    <table class="leave-table">
+      <thead><tr><th>Hemşire</th><th>Tarih</th><th>Gün</th><th>Nöbet</th><th></th></tr></thead>
+      <tbody id="leaves"></tbody>
+    </table>
+  </section>
+
+  <dialog id="errors">
+    <h2 id="errors-title"></h2>
+    <ul id="errors-list"></ul>
+    <form method="dialog"><button>Kapat</button></form>
+  </dialog>
+
+  <script src="seed.js"></script>
+  <script src="schedule.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
