@@ -6,12 +6,19 @@
   <title>Nöbet Çizelgesi</title>
   <style>
     :root { --line: #d0d4da; --muted: #6b7280; --shift: #2563eb; --leave: #f59e0b; --weekend: #fde2e2; --weekend-ink: #b91c1c; --bad: #dc2626; }
-    body { font-family: system-ui, sans-serif; margin: 24px; color: #111827; background: #fff; }
-    header { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
-    h1 { font-size: 20px; margin: 0 16px 0 0; }
+    body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; margin: 0; padding: 20px 24px; color: #111827; background: #f5f6f8; }
+    header { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: -20px -24px 16px; padding: 12px 24px; background: #fff; border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 3; }
+    header .group { display: flex; gap: 6px; align-items: center; }
+    header .group + .group { padding-left: 10px; border-left: 1px solid var(--line); }
+    header .backup { margin-left: auto; }
+    h1 { font-size: 18px; margin: 0 8px 0 0; }
     h2 { font-size: 15px; margin: 0 0 10px; }
-    select, button, input { font: inherit; padding: 5px 8px; }
-    button.has-errors { background: var(--bad); color: #fff; border: 1px solid var(--bad); border-radius: 4px; }
+    select, button, input { font: inherit; padding: 6px 10px; }
+    header select, header input, header button { border: 1px solid var(--line); border-radius: 6px; background: #fff; color: #111827; }
+    header button { cursor: pointer; }
+    header button:hover { background: #f3f4f6; }
+    header button.primary:hover { background: #1d4ed8; }
+    header button.has-errors, header button.has-errors:hover { background: var(--bad); color: #fff; border-color: var(--bad); }
     .legend, #status { color: var(--muted); font-size: 13px; }
     .legend b { display: inline-block; width: 18px; text-align: center; border-radius: 3px; color: #fff; }
     .info { max-width: 900px; margin: 0 0 12px; padding: 10px 14px; border: 1px solid #bfdbfe; border-radius: 8px; background: #eff6ff; font-size: 13px; }
@@ -20,7 +27,8 @@
     .info dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; margin: 8px 0 0; }
     .info dt { font-weight: 600; }
     .info dd { margin: 0; }
-    .wrap { overflow-x: auto; }
+    .wrap { overflow-x: auto; background: #fff; border: 1px solid var(--line); border-radius: 10px; }
+    #grid { margin: -1px; }
     table { border-collapse: collapse; font-size: 13px; }
     th, td { border: 1px solid var(--line); padding: 4px; text-align: center; min-width: 22px; user-select: none; }
     th.name, td.name { text-align: left; white-space: nowrap; position: sticky; left: 0; background: #fff; min-width: 140px; z-index: 1; }
@@ -46,9 +54,11 @@
     th.prev, td.prev { border-right: 3px solid #6b7280; cursor: pointer; }
     td.prev.shift { cursor: pointer !important; }
     td.gap { background: #fecaca; }
-    .modes { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; font-size: 13px; margin-bottom: 10px; }
-    .modes > span { color: var(--muted); }
-    .modes label { display: flex; gap: 5px; align-items: center; cursor: pointer; }
+    .modes { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; font-size: 13px; margin-bottom: 10px; }
+    .modes > span { color: var(--muted); margin-right: 4px; }
+    .modes label { display: flex; gap: 6px; align-items: center; cursor: pointer; padding: 5px 10px; border: 1px solid var(--line); border-radius: 999px; background: #fff; }
+    .modes label:has(input:checked) { border-color: var(--shift); background: #eff6ff; color: #1e40af; }
+    .modes input { margin: 0; }
     header button.primary { background: var(--shift); color: #fff; border: 1px solid var(--shift); border-radius: 4px; }
     .want-mark { background: #dcfce7 !important; color: #15803d !important; font-weight: 700; }
     .off-mark { background: #e5e7eb !important; color: #4b5563 !important; font-weight: 700; }
@@ -57,7 +67,7 @@
     td.off { background: repeating-linear-gradient(45deg, #f3f4f6, #f3f4f6 4px, #e5e7eb 4px, #e5e7eb 8px); color: #4b5563; font-weight: 700; }
     td.off.shift { box-shadow: inset 0 0 0 2px #4b5563; }
     td.rest { background: #fef3c7; color: #92400e; font-size: 10px; font-weight: 600; }
-    .leave-panel { margin-top: 28px; max-width: 900px; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+    .leave-panel { background: #fff; margin-top: 24px; max-width: 900px; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
     .leave-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-bottom: 1px solid var(--line); }
     .leave-head h2 { margin: 0; }
     .toggle { font-size: 13px; color: var(--muted); display: flex; gap: 6px; align-items: center; }
@@ -81,22 +91,28 @@
     dialog { border: 1px solid var(--line); border-radius: 8px; max-width: 520px; width: 90vw; }
     dialog ul { max-height: 50vh; overflow-y: auto; padding-left: 20px; }
     dialog li { margin-bottom: 4px; }
-    @media print { header button, .info, .modes, .leave-panel, td.name button, tr.add-row { display: none; } td.name input { border: none; } body { margin: 8px; } }
+    @media print { header { position: static; } .wrap { border: none; } header button, .info, .modes, .leave-panel, td.name button, tr.add-row { display: none; } td.name input { border: none; } body { margin: 8px; } }
   </style>
 </head>
 <body>
   <header>
     <h1>Hemşire Nöbet Çizelgesi</h1>
-    <select id="month"></select>
-    <input id="year" type="number" min="2020" max="2100" style="width:90px">
-    <button id="check">Kontrol et</button>
-    <button id="autofill" class="primary">Otomatik doldur</button>
-    <button id="clear">Temizle</button>
-    <button onclick="window.print()">Yazdır</button>
-    <button id="backup-download">Yedek indir</button>
-    <button id="backup-upload">Yedek yükle</button>
-    <input id="backup-file" type="file" accept="application/json,.json" hidden>
+    <div class="group">
+      <select id="month"></select>
+      <input id="year" type="number" min="2020" max="2100" style="width:90px">
+    </div>
+    <div class="group">
+      <button id="autofill" class="primary">Otomatik doldur</button>
+      <button id="check">Kontrol et</button>
+      <button id="clear">Temizle</button>
+      <button onclick="window.print()">Yazdır</button>
+    </div>
     <span id="status"></span>
+    <div class="group backup">
+      <button id="backup-download">Yedek indir</button>
+      <button id="backup-upload">Yedek yükle</button>
+      <input id="backup-file" type="file" accept="application/json,.json" hidden>
+    </div>
   </header>
   <div class="modes" role="radiogroup" aria-label="Tıklayınca">
     <span>Tıklayınca:</span>

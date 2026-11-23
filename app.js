@@ -360,4 +360,8 @@ $("backup-file").addEventListener("change", async (e) => {
   save();
 });
 
-useState(loadSaved() ?? { perDay: 6, nurses: [], leaves: [] });
+useState(loadSaved() ?? {
+  perDay: 6,
+  nurses: Array.from({ length: 22 }, (_, i) => ({ id: `n${i + 1}`, name: `Hemşire ${i + 1}` })),
+  leaves: [],
+});
